@@ -19,16 +19,16 @@ uses
 
   Utils.Errors;
 
-function GetEntityName(const DataSet: TFDTable): String;
-procedure FetchOrError(const DataSet: TFDDataSet; const Error: Exception);
-procedure FetchOrNotFound(const DataSet: TFDDataSet; const Entity: String);
+function GetEntityName(const Query: TFDCustomQuery): String;
+procedure FetchOrError(const Query: TFDCustomQuery; const Error: Exception);
+procedure FetchOrNotFound(const Query: TFDCustomQuery; const Entity: String);
 
 type
 
   iEzQuery = interface ['{A83CF569-9B87-46AC-9EEF-CC3E6BD9B24B}']
 
-    function Table(
-      const Table: TFDTable;
+    function Query(
+      const Query: TFDCustomQuery;
       const ExcludeDeleted: Boolean = True;
       const DeleteAtColumnName: String = 'DELETED_AT'
     ): iEzQuery;
@@ -37,7 +37,7 @@ type
     function &Or(const Condition: String): iEzQuery;
     function Join(
       const Alias: String;
-      const DataSet: TFDTable;
+      const Query: TFDCustomQuery;
       const DataSourse: TDataSource;
       const MasterFields: String
     ): iEzQuery;
@@ -48,28 +48,28 @@ type
       const JSON: TJSONObject;
       const CreatedAtColumnName: String = 'CREATED_AT';
       const ReadOnly: Boolean = True
-    ): TFDDataSet;
+    ): TFDCustomQuery;
 
     function UpdateOne(
       const JSON: TJSONObject;
       const UpdatedAtColumnName: String = 'UPDATED_AT';
       const ReadOnly: Boolean = True
-    ): TFDDataSet; overload;
+    ): TFDCustomQuery; overload;
 
     function UpdateOne(
       const Script: TProc;
       const UpdatedAtColumnName: String = 'UPDATED_AT';
       const ReadOnly: Boolean = True
-    ): TFDDataSet; overload;
+    ): TFDCustomQuery; overload;
 
     function SoftDelete(
       const ColumnName: String = 'DELETED_AT';
       const ReadOnly: Boolean = True
-    ): TFDDataSet; overload;
+    ): TFDCustomQuery; overload;
 
-    function Fetch(): TFDDataSet;
-    function FetchOrError(const Error: Exception): TFDDataSet;
-    function FetchOrNotFound(): TFDDataSet;
+    function Fetch(): TFDCustomQuery;
+    function FetchOrError(const Error: Exception): TFDCustomQuery;
+    function FetchOrNotFound(): TFDCustomQuery;
 
   end;
 
@@ -78,7 +78,7 @@ type
   strict private
 
     FConnection     : TFDConnection;
-    FTable          : TFDTable;
+    FTable          : TFDCustomQuery;
 
     BeforeExecEvent : TProc;
 
@@ -92,8 +92,8 @@ type
 
     class function New(const Connection: TFDConnection): iEzQuery;
 
-    function Table(
-      const Table: TFDTable;
+    function Query(
+      const Query: TFDCustomQuery;
       const ExcludeDeleted: Boolean = True;
       const DeleteAtColumnName: String = 'DELETED_AT'
     ): iEzQuery;
@@ -102,7 +102,7 @@ type
     function &Or(const Condition: String): iEzQuery;
     function Join(
       const Alias: String;
-      const DataSet: TFDTable;
+      const Query: TFDCustomQuery;
       const DataSourse: TDataSource;
       const MasterFields: String
     ): iEzQuery;
@@ -113,54 +113,54 @@ type
       const JSON: TJSONObject;
       const CreatedAtColumnName: String = 'CREATED_AT';
       const ReadOnly: Boolean = True
-    ): TFDDataSet;
+    ): TFDCustomQuery;
 
     function UpdateOne(
       const JSON: TJSONObject;
       const UpdatedAtColumnName: String = 'UPDATED_AT';
       const ReadOnly: Boolean = True
-    ): TFDDataSet; overload;
+    ): TFDCustomQuery; overload;
 
     function UpdateOne(
       const Script: TProc;
       const UpdatedAtColumnName: String = 'UPDATED_AT';
       const ReadOnly: Boolean = True
-    ): TFDDataSet; overload;
+    ): TFDCustomQuery; overload;
 
     function SoftDelete(
       const ColumnName: String = 'DELETED_AT';
       const ReadOnly: Boolean = True
-    ): TFDDataSet; overload;
+    ): TFDCustomQuery; overload;
 
-    function Fetch(): TFDDataSet;
-    function FetchOrError(const Error: Exception): TFDDataSet;
-    function FetchOrNotFound(): TFDDataSet;
+    function Fetch(): TFDCustomQuery;
+    function FetchOrError(const Error: Exception): TFDCustomQuery;
+    function FetchOrNotFound(): TFDCustomQuery;
 
   end;
 
 implementation
 
-function GetEntityName(const DataSet: TFDTable): String;
+function GetEntityName(const Query: TFDCustomQuery): String;
 begin
 
-  Result := DataSet.TableName;
+  Result := Query.Name;
 
 end;
 
-procedure FetchOrError(const DataSet: TFDDataSet; const Error: Exception);
+procedure FetchOrError(const Query: TFDCustomQuery; const Error: Exception);
 begin
 
-  if DataSet.FetchNext() = 0 then
+  if Query.FetchNext() = 0 then
     raise Error
   else
     FreeAndNil(Error);
 
 end;
 
-procedure FetchOrNotFound(const DataSet: TFDDataSet; const Entity: String);
+procedure FetchOrNotFound(const Query: TFDCustomQuery; const Entity: String);
 begin
 
-  FetchOrError(DataSet, EEntidadeNaoEncontrada.Create(Entity));
+  FetchOrError(Query, EEntidadeNaoEncontrada.Create(Entity));
 
 end;
 
@@ -185,7 +185,7 @@ end;
 function TEzQuery.SoftDelete(
       const ColumnName: String = 'DELETED_AT';
       const ReadOnly: Boolean = True
-    ): TFDDataSet;
+    ): TFDCustomQuery;
 var
   DeletedAt : TField;
 
@@ -206,8 +206,8 @@ begin
 
 end;
 
-function TEzQuery.Table(
-      const Table: TFDTable;
+function TEzQuery.Query(
+      const Query: TFDCustomQuery;
       const ExcludeDeleted: Boolean = True;
       const DeleteAtColumnName: String = 'DELETED_AT'
     ): iEzQuery;
@@ -215,7 +215,7 @@ begin
 
   Result := Self;
 
-  FTable := Table;
+  FTable := Query;
   FTable.Connection := FConnection;
   FTable.FetchOptions.Mode := TFDFetchMode.fmManual;
   FTable.Open();
@@ -229,7 +229,7 @@ function TEzQuery.UpdateOne(
       const Script: TProc;
       const UpdatedAtColumnName: String = 'UPDATED_AT';
       const ReadOnly: Boolean = True
-): TFDDataSet;
+): TFDCustomQuery;
 var
   UpdatedAt : TField;
 
@@ -271,7 +271,7 @@ begin
 
 end;
 
-function TEzQuery.Fetch: TFDDataSet;
+function TEzQuery.Fetch: TFDCustomQuery;
 begin
 
   Result := FTable;
@@ -280,7 +280,7 @@ begin
 
 end;
 
-function TEzQuery.FetchOrError(const Error: Exception): TFDDataSet;
+function TEzQuery.FetchOrError(const Error: Exception): TFDCustomQuery;
 begin
 
   Result := FTable;
@@ -294,7 +294,7 @@ begin
 
 end;
 
-function TEzQuery.FetchOrNotFound: TFDDataSet;
+function TEzQuery.FetchOrNotFound: TFDCustomQuery;
 begin
 
   Result := FTable;
@@ -328,7 +328,7 @@ function TEzQuery.Insert(
       const JSON: TJSONObject;
       const CreatedAtColumnName: String = 'CREATED_AT';
       const ReadOnly: Boolean = True
-    ): TFDDataSet;
+    ): TFDCustomQuery;
 var
   CreatedAt : TField;
 
@@ -356,7 +356,7 @@ end;
 
 function TEzQuery.Join(
       const Alias: String;
-      const DataSet: TFDTable;
+      const Query: TFDCustomQuery;
       const DataSourse: TDataSource;
       const MasterFields: String
     ): iEzQuery;
@@ -364,12 +364,12 @@ begin
 
   Result := Self;
 
-  DataSet.Connection := FConnection;
-  DataSet.FetchOptions.Mode := TFDFetchMode.fmManual;
-  DataSet.Name := Alias;
-  DataSet.MasterSource := DataSourse;
-  DataSet.MasterFields := MasterFields;
-  DataSet.Open();
+  Query.Connection := FConnection;
+  Query.FetchOptions.Mode := TFDFetchMode.fmManual;
+  Query.Name := Alias;
+  Query.MasterSource := DataSourse;
+  Query.MasterFields := MasterFields;
+  Query.Open();
 
 end;
 
@@ -393,7 +393,7 @@ function TEzQuery.UpdateOne(
       const JSON: TJSONObject;
       const UpdatedAtColumnName: String = 'UPDATED_AT';
       const ReadOnly: Boolean = True
-): TFDDataSet;
+): TFDCustomQuery;
 var
   UpdatedAt : TField;
 
@@ -415,19 +415,6 @@ begin
   UpdatedAt.ReadOnly := ReadOnly;
 
   FTable.MergeFromJSONObject(JSON, False);
-
-end;
-
-{$ENDREGION}
-
-{$REGION 'EntityName'}
-
-constructor EntityName.Create(const pName: String);
-begin
-
-  inherited Create();
-
-  FName := Name;
 
 end;
 
