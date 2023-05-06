@@ -78,7 +78,7 @@ type
   strict private
 
     FConnection     : TFDConnection;
-    FTable          : TFDCustomQuery;
+    FQuery          : TFDCustomQuery;
 
     BeforeExecEvent : TProc;
 
@@ -170,7 +170,7 @@ function TEzQuery.&And(const Condition: String): iEzQuery;
 begin
 
   Result := Self;
-  FTable.Filter := FTable.Filter + ' and (' + Condition + ') ';
+  FQuery.Filter := FQuery.Filter + ' and (' + Condition + ') ';
 
 end;
 
@@ -178,7 +178,7 @@ function TEzQuery.&Or(const Condition: String): iEzQuery;
 begin
 
   Result := Self;
-  FTable.Filter := FTable.Filter + ' or (' + Condition + ') ';
+  FQuery.Filter := FQuery.Filter + ' or (' + Condition + ') ';
 
 end;
 
@@ -191,18 +191,18 @@ var
 
 begin
 
-  Result := FTable;
+  Result := FQuery;
 
-  FTable.Edit();
+  FQuery.Edit();
 
   if Assigned(BeforeExecEvent) then
     BeforeExecEvent();
 
-  DeletedAt := FTable.FieldByName(ColumnName);
+  DeletedAt := FQuery.FieldByName(ColumnName);
   DeletedAt.ReadOnly := False;
   DeletedAt.AsDateTime := Now();
   DeletedAt.ReadOnly := ReadOnly;
-  FTable.Post();
+  FQuery.Post();
 
 end;
 
@@ -215,10 +215,10 @@ begin
 
   Result := Self;
 
-  FTable := Query;
-  FTable.Connection := FConnection;
-  FTable.FetchOptions.Mode := TFDFetchMode.fmManual;
-  FTable.Open();
+  FQuery := Query;
+  FQuery.Connection := FConnection;
+  FQuery.FetchOptions.Mode := TFDFetchMode.fmManual;
+  FQuery.Open();
 
   if ExcludeDeleted then
     FOuterFilter := DeleteAtColumnName + ' IS NULL';
@@ -235,8 +235,10 @@ var
 
 begin
 
+  Result := FQuery;
+
   FetchOrNotFound();
-  FTable.Edit();
+  FQuery.Edit();
 
   if Assigned(BeforeExecEvent) then
     BeforeExecEvent();
@@ -244,12 +246,12 @@ begin
   if Assigned(Script) then
     Script();
 
-  UpdatedAt := FTable.FieldByName(UpdatedAtColumnName);
+  UpdatedAt := FQuery.FieldByName(UpdatedAtColumnName);
   UpdatedAt.ReadOnly := False;
   UpdatedAt.AsDateTime := Now();
   UpdatedAt.ReadOnly := ReadOnly;
 
-  FTable.Post();
+  FQuery.Post();
 
 end;
 
@@ -274,20 +276,20 @@ end;
 function TEzQuery.Fetch: TFDCustomQuery;
 begin
 
-  Result := FTable;
+  Result := FQuery;
   GroupFilter(FOuterFilter);
-  FTable.FetchNext();
+  FQuery.FetchNext();
 
 end;
 
 function TEzQuery.FetchOrError(const Error: Exception): TFDCustomQuery;
 begin
 
-  Result := FTable;
+  Result := FQuery;
 
   GroupFilter(FOuterFilter);
-  FTable.FetchNext();
-  if FTable.RecordCount = 0 then
+  FQuery.FetchNext();
+  if FQuery.RecordCount = 0 then
     raise Error
   else
     FreeAndNil(Error);
@@ -297,8 +299,8 @@ end;
 function TEzQuery.FetchOrNotFound: TFDCustomQuery;
 begin
 
-  Result := FTable;
-  FetchOrError(EEntidadeNaoEncontrada.Create( GetEntityName(FTable) ));
+  Result := FQuery;
+  FetchOrError(EEntidadeNaoEncontrada.Create( GetEntityName(FQuery) ));
 
 end;
 
@@ -307,10 +309,10 @@ begin
 
   Result := Self;
 
-  FTable.Filtered := True;
+  FQuery.Filtered := True;
 
-  if FTable.Filter.IsEmpty then
-    FTable.Filter := ' (' + Condition + ') '
+  if FQuery.Filter.IsEmpty then
+    FQuery.Filter := ' (' + Condition + ') '
 
   else
     &And(Condition);
@@ -320,7 +322,7 @@ end;
 procedure TEzQuery.GroupFilter(const OuterFilter: String);
 begin
 
-  FTable.Filter := '(' + FOuterFilter + ') AND (' + FTable.Filter + ')';
+  FQuery.Filter := '(' + FOuterFilter + ') AND (' + FQuery.Filter + ')';
 
 end;
 
@@ -334,23 +336,23 @@ var
 
 begin
 
-  Result := FTable;
+  Result := FQuery;
 
-  FTable.Open();
-  FTable.Insert();
+  FQuery.Open();
+  FQuery.Insert();
 
   if Assigned(BeforeExecEvent) then
     BeforeExecEvent();
 
-  CreatedAt := FTable.FieldByName(CreatedAtColumnName);
+  CreatedAt := FQuery.FieldByName(CreatedAtColumnName);
   CreatedAt.ReadOnly := False;
   CreatedAt.AsDateTime := Now();
   CreatedAt.ReadOnly := ReadOnly;
 
-  FTable.MergeFromJSONObject(JSON, False);
+  FQuery.MergeFromJSONObject(JSON, False);
 
-  if FTable.State <> TDataSetState.dsBrowse then
-    FTable.Post();
+  if FQuery.State <> TDataSetState.dsBrowse then
+    FQuery.Post();
 
 end;
 
@@ -399,22 +401,22 @@ var
 
 begin
 
-  Result := FTable;
+  Result := FQuery;
 
-  FTable.Open();
+  FQuery.Open();
   FetchOrNotFound();
 
-  FTable.Edit();
+  FQuery.Edit();
 
   if Assigned(BeforeExecEvent) then
     BeforeExecEvent();
 
-  UpdatedAt := FTable.FieldByName(UpdatedAtColumnName);
+  UpdatedAt := FQuery.FieldByName(UpdatedAtColumnName);
   UpdatedAt.ReadOnly := False;
   UpdatedAt.AsDateTime := Now();
   UpdatedAt.ReadOnly := ReadOnly;
 
-  FTable.MergeFromJSONObject(JSON, False);
+  FQuery.MergeFromJSONObject(JSON, False);
 
 end;
 
