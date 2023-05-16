@@ -219,7 +219,7 @@ begin
   FQuery := Query;
   FQuery.Connection := FConnection;
   FQuery.FetchOptions.Mode := TFDFetchMode.fmManual;
-  FQuery.OnPostError := EEzQueryDefaultPostError;
+  FQuery.OnPostError := EEzQueryDefaultPostError.SelfRaise;
   FQuery.Open();
 
   if ExcludeDeleted then
