@@ -15,9 +15,9 @@ uses
   FireDAC.Comp.Client,
   FireDAC.Stan.Option,
 
-  Data.DB,
+  Utils.Errors,
 
-  Utils.Errors;
+  Data.DB;
 
 function GetEntityName(const Query: TFDCustomQuery): String;
 procedure FetchOrError(const Query: TFDCustomQuery; const Error: Exception);
@@ -160,7 +160,7 @@ end;
 procedure FetchOrNotFound(const Query: TFDCustomQuery; const Entity: String);
 begin
 
-  FetchOrError(Query, EEntidadeNaoEncontrada.Create(Entity));
+  FetchOrError(Query, EEzQueryEntityNotFound.Create(Entity));
 
 end;
 
@@ -193,6 +193,7 @@ begin
 
   Result := FQuery;
 
+  FetchOrNotFound();
   FQuery.Edit();
 
   if Assigned(BeforeExecEvent) then
@@ -218,6 +219,7 @@ begin
   FQuery := Query;
   FQuery.Connection := FConnection;
   FQuery.FetchOptions.Mode := TFDFetchMode.fmManual;
+  FQuery.OnPostError := EEzQueryDefaultPostError;
   FQuery.Open();
 
   if ExcludeDeleted then
