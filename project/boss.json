@@ -1,9 +1,12 @@
 {
 	"name": "EzQuery",
 	"description": "EzQuery is a library that provides orm-like sql operations for Delphi with FireDAC",
-	"version": "1.0.0",
+	"version": "1.1.1",
 	"homepage": "https://github.com/Mateus-SF/EzQuery",
-	"mainsrc": "./",
+	"mainsrc": "./src",
 	"projects": [],
-	"dependencies": {}
+	"dependencies": {
+		"github.com/hashload/horse": "^3.1.3",
+		"https://github.com/viniciussanchez/dataset-serialize": "^v2.4.9"
+	}
 }
