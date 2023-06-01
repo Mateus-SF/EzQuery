@@ -52,8 +52,6 @@ type
 
   TDBCallback = reference to procedure(Conn: TBaseConnection; AReq: THorseRequest; ARes: THorseResponse; ANext: TProc);
 
-function DBCallback(const ConnectionClass: TClass; const Callback: TDBCallback): THorseCallback;
-
 var
   BaseConnection: TBaseConnection;
 
@@ -97,29 +95,6 @@ procedure TBaseConnection.DataModuleDestroy(Sender: TObject);
 begin
 
   DB.Close();
-
-end;
-
-function DBCallback(const ConnectionClass: TClass; const Callback: TDBCallback): THorseCallback;
-begin
-
-  Result := procedure(Req: THorseRequest; Res: THorseResponse; Next: TProc)
-  var
-    Conn  : ConnectionClass;
-
-  begin
-
-    try
-
-      Conn := ConnectionClass.Create(nil);
-      Callback(Conn, Req, Res, Next);
-
-    finally
-      FreeAndNil(Conn);
-
-    end;
-
-  end;
 
 end;
 
