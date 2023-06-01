@@ -7,8 +7,8 @@ program EzQueryProject;
 uses
   System.SysUtils,
   EzQuery in '..\src\EzQuery.pas',
-  EzQuery.Connection in '..\src\EzQuery.Connection.pas' {Connection: TDataModule},
-  EzQuery.Manager in '..\src\EzQuery.Manager.pas' {Manager: TDataModule};
+  EzQuery.Base.Connection in '..\bases\EzQuery.Base.Connection.pas' {BaseConnection: TDataModule},
+  EzQuery.Base.Manager in '..\bases\EzQuery.Base.Manager.pas' {BaseManager: TDataModule};
 
 begin
 

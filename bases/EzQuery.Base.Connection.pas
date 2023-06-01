@@ -1,4 +1,4 @@
-unit EzQuery.Connection;
+unit EzQuery.Base.Connection;
 
 interface
 
@@ -28,7 +28,7 @@ uses
 
   Data.DB,
 
-  EzQuery.Manager,
+  EzQuery.Base.Manager,
 
   Horse,
   Horse.Response,
@@ -36,7 +36,7 @@ uses
 
 type
 
-  TConnection = class(TDataModule)
+  TBaseConnection = class(TDataModule)
 
     DB: TFDConnection;
     PhysFBDriverLink: TFDPhysFBDriverLink;
@@ -46,18 +46,16 @@ type
 
   private
 
-    FParamsConn: TStrings;
-
   public
 
   end;
 
-  TDBCallback = reference to procedure(Conn: TConnection; AReq: THorseRequest; ARes: THorseResponse; ANext: TProc);
+  TDBCallback = reference to procedure(Conn: TBaseConnection; AReq: THorseRequest; ARes: THorseResponse; ANext: TProc);
 
-function DBCallback(const Callback: TDBCallback): THorseCallback;
+function DBCallback(const ConnectionClass: TClass; const Callback: TDBCallback): THorseCallback;
 
 var
-  Connection: TConnection;
+  BaseConnection: TBaseConnection;
 
 implementation
 
@@ -65,7 +63,7 @@ implementation
 
 {$R *.dfm}
 
-procedure TConnection.DataModuleCreate(Sender: TObject);
+procedure TBaseConnection.DataModuleCreate(Sender: TObject);
 var
   Config  : TIniFile;
 
@@ -95,25 +93,25 @@ begin
 
 end;
 
-procedure TConnection.DataModuleDestroy(Sender: TObject);
+procedure TBaseConnection.DataModuleDestroy(Sender: TObject);
 begin
 
   DB.Close();
 
 end;
 
-function DBCallback(const Callback: TDBCallback): THorseCallback;
+function DBCallback(const ConnectionClass: TClass; const Callback: TDBCallback): THorseCallback;
 begin
 
   Result := procedure(Req: THorseRequest; Res: THorseResponse; Next: TProc)
   var
-    Conn  : TConnection;
+    Conn  : ConnectionClass;
 
   begin
 
     try
 
-      Conn := TConnection.Create(nil);
+      Conn := ConnectionClass.Create(nil);
       Callback(Conn, Req, Res, Next);
 
     finally

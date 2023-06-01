@@ -1,4 +1,4 @@
-unit EzQuery.Manager;
+unit EzQuery.Base.Manager;
 
 interface
 
@@ -17,18 +17,21 @@ uses
   FireDAC.Comp.Client;
 
 type
-  TManager = class(TDataModule)
+
+  TBaseManager = class(TDataModule)
+
     DBManager: TFDManager;
     procedure DataModuleDestroy(Sender: TObject);
     procedure DataModuleCreate(Sender: TObject);
+
   private
-    { Private declarations }
+
   public
-    { Public declarations }
+
   end;
 
 var
-  Manager: TManager;
+  BaseManager: TBaseManager;
 
 implementation
 
@@ -36,7 +39,7 @@ implementation
 
 {$R *.dfm}
 
-procedure TManager.DataModuleCreate(Sender: TObject);
+procedure TBaseManager.DataModuleCreate(Sender: TObject);
 begin
 
   {$IF DEFINED(RELEASE)}
@@ -45,19 +48,11 @@ begin
 
 end;
 
-procedure TManager.DataModuleDestroy(Sender: TObject);
+procedure TBaseManager.DataModuleDestroy(Sender: TObject);
 begin
 
   DBManager.Close();
 
 end;
-
-initialization
-
-  Manager := TManager.Create(nil);
-
-finalization
-
-  FreeAndNil(Manager);
 
 end.

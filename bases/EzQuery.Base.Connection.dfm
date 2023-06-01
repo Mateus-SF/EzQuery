@@ -1,4 +1,4 @@
-object Connection: TConnection
+object BaseConnection: TBaseConnection
   OnCreate = DataModuleCreate
   OnDestroy = DataModuleDestroy
   Height = 98

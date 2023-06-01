@@ -1,4 +1,4 @@
-object Manager: TManager
+object BaseManager: TBaseManager
   OnCreate = DataModuleCreate
   OnDestroy = DataModuleDestroy
   Height = 99
