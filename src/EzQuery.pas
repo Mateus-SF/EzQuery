@@ -15,7 +15,7 @@ uses
   FireDAC.Comp.Client,
   FireDAC.Stan.Option,
 
-  Utils.Errors,
+  EzQuery.Errors,
 
   Data.DB;
 
