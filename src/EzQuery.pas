@@ -21,7 +21,7 @@ uses
 
 function GetEntityName(const Query: TFDCustomQuery): String;
 procedure FetchOrError(const Query: TFDCustomQuery; const Error: Exception);
-procedure FetchOrNotFound(const Query: TFDCustomQuery; const Entity: String);
+procedure FetchOrNotFound(const Query: TFDCustomQuery);
 
 type
 
@@ -157,10 +157,10 @@ begin
 
 end;
 
-procedure FetchOrNotFound(const Query: TFDCustomQuery; const Entity: String);
+procedure FetchOrNotFound(const Query: TFDCustomQuery);
 begin
 
-  FetchOrError(Query, EEzQueryEntityNotFound.Create(Entity));
+  FetchOrError(Query, EEntityNotFound.Create());
 
 end;
 
@@ -219,7 +219,7 @@ begin
   FQuery := Query;
   FQuery.Connection := FConnection;
   FQuery.FetchOptions.Mode := TFDFetchMode.fmManual;
-  FQuery.OnPostError := EEzQueryDefaultPostError.SelfRaise;
+  FQuery.OnPostError := EDefaultPostError.SelfRaise;
   FQuery.Open();
 
   if ExcludeDeleted then
@@ -302,7 +302,7 @@ function TEzQuery.FetchOrNotFound: TFDCustomQuery;
 begin
 
   Result := FQuery;
-  FetchOrError(EEntidadeNaoEncontrada.Create( GetEntityName(FQuery) ));
+  FetchOrError(EEntityNotFound.Create());
 
 end;
 
